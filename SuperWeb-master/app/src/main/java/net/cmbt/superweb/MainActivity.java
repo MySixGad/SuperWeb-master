@@ -16,7 +16,7 @@ public class MainActivity extends SuperWebView {
 
         //SuperWeb的基础配置、上传文件配置、下载文件配置、缓存配置
         SwebManager.Web web = new SwebManager.Web();
-        web.setLoadNetUrl("http://39.104.97.114:8888/?_loadType=app")
+        web.setLoadNetUrl("https://github.com/MySixGad/SuperWeb-master")
                 .configBasics(true, true, true, true)
                 .configUpFile(SuperContact.UPFILETYPE_CUSTOM, "200*200", 2, "选择操作")
                 .configDownFile(SuperContact.DOWNFILETYPE_CUSTOM, "/dev/data")

@@ -1,7 +1,7 @@
 //apply plugin: 'com.android.application'
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.1421880926@qq.com'
+group='com.github.MySixGad'
 
 android {
     compileSdkVersion 26

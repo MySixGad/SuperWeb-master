@@ -8,6 +8,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/Dialog_Lib" />
+            <option value="$PROJECT_DIR$/album" />
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>

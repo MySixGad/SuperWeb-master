@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Dialog_Lib/Dialog_Lib.iml" filepath="$PROJECT_DIR$/Dialog_Lib/Dialog_Lib.iml" />
       <module fileurl="file://$PROJECT_DIR$/SuperWeb-master.iml" filepath="$PROJECT_DIR$/SuperWeb-master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/album/album.iml" filepath="$PROJECT_DIR$/album/album.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

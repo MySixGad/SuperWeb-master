@@ -6,7 +6,7 @@
 
 
     <WebView
-        android:id="@+id/webview"
+        android:id="@+id/superweb_webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -14,14 +14,14 @@
 
 
     <ImageView
-        android:id="@+id/load_img"
+        android:id="@+id/superweb_load_img"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_centerInParent="true" />
 
 
     <ProgressBar
-        android:id="@+id/progress"
+        android:id="@+id/superweb_progress"
         style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="3dp"

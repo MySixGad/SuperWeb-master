@@ -1,13 +1,17 @@
 package net.cmbt.superweb;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DownloadManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -26,23 +30,28 @@ import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-
+import com.yanzhenjie.album.Album;
+import net.cmbt.superweb.inteface.SwebLoadListener;
+import net.cmbt.superweb.utils.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
-public class SuperWebView extends AppCompatActivity {
+public abstract class SuperWebView extends AppCompatActivity {
+    private static final int ACTIVITY_CAMREA = 6666;
+    private static final int ACTIVITY_ALBUM = 9999;
     private static WebView sWebView;
     private static View load_view;
     private static ProgressBar progressBar;
     private static ImageView load_img;
     private ValueCallback<Uri[]> mUploadMessage;
     private final static int FILECHOOSER_RESULTCODE = 1;
+    private boolean LOAD_ONCE = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,10 +61,15 @@ public class SuperWebView extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        initWebView();
+        if (!LOAD_ONCE) {
+            initWebView();
+        }
+        LOAD_ONCE = true;
     }
 
     private void initWebView() {
+        ActivityCompat.requestPermissions(SuperWebView.this, new String[]{Manifest.permission.SEND_SMS}, 0);
+
         load_img.setVisibility(SwebManager.Progress.isHideModileGif ? View.GONE : View.VISIBLE);
         progressBar.setVisibility(SwebManager.Progress.isHideTopProgress ? View.GONE : View.VISIBLE);
 
@@ -73,14 +87,13 @@ public class SuperWebView extends AppCompatActivity {
         webSettings.setCacheMode(SwebManager.Web.cacheMode); //缓存模式
         webSettings.setAppCacheEnabled(SwebManager.Web.appCacheEnabled); //app缓存
 
-        if (SwebManager.Web.LoadNetUrl != null) {
-            sWebView.loadUrl(SwebManager.Web.LoadNetUrl);
-        } else if (SwebManager.Web.LoadLocalData != null) {
-            sWebView.loadDataWithBaseURL(null, SwebManager.Web.LoadLocalData, "text/html", "utf-8", null);
+        if (SwebManager.Web.NetUrl != null) {
+            sWebView.loadUrl(SwebManager.Web.NetUrl);
+        } else if (SwebManager.Web.LocalData != null) {
+            sWebView.loadDataWithBaseURL(null, SwebManager.Web.LocalData, "text/html", "utf-8", null);
         } else {
             sWebView.loadDataWithBaseURL(null, "您未设置URL，请选择LoadNetUrl或LoadLocalData方法加载URL", "text/html", "utf-8", null);
         }
-
 
         webSettings.setJavaScriptCanOpenWindowsAutomatically(false);
         webSettings.setUseWideViewPort(true);// 关键点
@@ -93,7 +106,7 @@ public class SuperWebView extends AppCompatActivity {
         sWebView.getSettings().setDomStorageEnabled(true);
         // 开启 database storage API 功能
         sWebView.getSettings().setDatabaseEnabled(true);
-        sWebView.addJavascriptInterface(new JsCallbackMethodArea(), SwebManager.Web.jsInterfaceName);
+        sWebView.addJavascriptInterface(SuperWebView.jsCallback, SwebManager.Web.jsInterfaceName);
         int mDensity = getResources().getDisplayMetrics().densityDpi;
         if (mDensity == 240) {
             webSettings.setDefaultZoom(WebSettings.ZoomDensity.FAR);
@@ -124,6 +137,31 @@ public class SuperWebView extends AppCompatActivity {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+                if (SuperWebView.SwebManager.Web.supportCallSMS) {
+                    if (url.startsWith("tel:")) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(intent);
+                        return true;
+                    }
+
+                    if (url.startsWith("sms:")) {
+                        try {
+                            String replace = url.replace("sms:", "");
+                            replace = replace.replace("body=", "");
+                            Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + replace.substring(0, replace.indexOf("?"))));
+                            intent.putExtra("sms_body", replace.substring(replace.indexOf("?") + 1, replace.length()));
+                            startActivity(intent);
+                        } catch (Exception e) {}
+                        return true;
+                    }
+
+                    view.loadUrl(url);
+                } else {
+                    return false;
+                }
+
+
                 return false;
             }
         });
@@ -166,8 +204,8 @@ public class SuperWebView extends AppCompatActivity {
                         // 允许下载的网路类型
                         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI);
                         // 设置下载文件保存的路径和文件名
-//                        String fileName  = URLUtil.guessFileName(url, contentDisposition, mimeType);
-                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "");
+                        String fileName  = URLUtil.guessFileName(url,SuperWebView.SwebManager.Web.downFilePath, url);
+                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
                         // 外可选一下方法，自定义下载路径bj8
                         // request.setDestinationUri()
                         // request.setDestinationInExternalFilesDir()
@@ -175,11 +213,6 @@ public class SuperWebView extends AppCompatActivity {
                         // 添加一个下载任务
                         long downloadId = downloadManager.enqueue(request);
                         break;
-
-                    case 3:
-                        Toast.makeText(SuperWebView.this, "自定义下载器，仿苹果", Toast.LENGTH_SHORT).show();
-                        break;
-
                 }
 
             }
@@ -239,15 +272,63 @@ public class SuperWebView extends AppCompatActivity {
 
             switch (SwebManager.Web.upFileType) {
                 case 1:
+
                     choseWebFile(filePath);
+
                     break;
 
                 case 2:
-                    Toast.makeText(SuperWebView.this, "自定义的文件选择器", Toast.LENGTH_SHORT).show();
+
+                    asAppleSeleFile(filePath);
+
                     break;
             }
             return true;
         }
+    }
+
+    /**
+     * 仿苹果
+     *
+     * @param filePath
+     */
+
+    private void asAppleSeleFile(ValueCallback<Uri[]> filePath) {
+/*        if (mUploadMessage != null) {
+            mUploadMessage.onReceiveValue(null);
+        }*/
+        mUploadMessage = filePath;
+
+        Utils.ActionSheetDialog(this, null, new String[]{"拍照", "相册"}, new Utils.onActionSheetDialogListener() {
+            @Override
+            public void onClick(int position, String mS, long id) {
+                if (position == 0) {
+
+                    Album.camera(SuperWebView.this)
+                            // .imagePath() // 指定相机拍照的路径，建议非特殊情况不要指定.
+                            .start(ACTIVITY_CAMREA); // 6666是请求码，返回时onActivityResult()的第一个参数。
+                } else {
+
+                    Album.album(SuperWebView.this)
+                            .toolBarColor(Color.parseColor("#ff0000")) // Toolbar 颜色，默认蓝色。
+                            .statusBarColor(Color.parseColor("#ff0000")) // StatusBar 颜色，默认蓝色。
+                            .navigationBarColor(Color.parseColor("#ff00ff")) // NavigationBar 颜色，默认黑色，建议使用默认。
+                            .title("图库") // 配置title。
+                            .columnCount(3) // 相册展示列数，默认是2列。
+                            .selectCount(1)
+                            .camera(false) // 是否有拍照功能。
+                            .start(ACTIVITY_ALBUM); // 9999是请求码，返回时onActivityResult()的第一个参数。
+                }
+            }
+
+
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                if (mUploadMessage != null) {
+                    mUploadMessage.onReceiveValue(null);
+                }
+            }
+        });
     }
 
 
@@ -271,6 +352,7 @@ public class SuperWebView extends AppCompatActivity {
                 photoFile = createImageFile();
                 takePictureIntent.putExtra("PhotoPath", mCameraPhotoPath);
             } catch (IOException ex) {
+
 
             }
 
@@ -304,49 +386,87 @@ public class SuperWebView extends AppCompatActivity {
 
 
     private File createImageFile() throws IOException {
-        // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
-        File imageFile = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
+        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File imageFile = File.createTempFile(imageFileName, ".jpg", storageDir);
         return imageFile;
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == FILECHOOSER_RESULTCODE) {
-            if (null == mUploadMessage)
-                return;
 
-            if (data != null) {
-                //返回有缩略图
-                if (data.hasExtra("data")) {
-                    Bitmap thumbnail = data.getParcelableExtra("data");
-                    Uri uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(), thumbnail, null, null));
-                    Uri[] uris = {uri};
-                    mUploadMessage.onReceiveValue(uris);
-                }
+        if (SuperWebView.SwebManager.Web.upFileType == 1) {
 
-                Uri result = data == null || resultCode != Activity.RESULT_OK ? null : data.getData();
-                try {
-                    Uri[] uris = {result};
-                    mUploadMessage.onReceiveValue(uris);
-                } catch (Exception ew) {
-                }
+            if (requestCode == FILECHOOSER_RESULTCODE) {
+                if (null == mUploadMessage)
+                    return;
 
-            } else {
-                if (mUploadMessage != null) {
-                    mUploadMessage.onReceiveValue(null);
+                if (data != null) {
+                    //返回有缩略图
+                    if (data.hasExtra("data")) {
+                        Bitmap thumbnail = data.getParcelableExtra("data");
+                        Uri uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(), thumbnail, null, null));
+                        Uri[] uris = {uri};
+
+                        mUploadMessage.onReceiveValue(uris);
+                    }
+
+                    Uri result = data == null || resultCode != Activity.RESULT_OK ? null : data.getData();
+                    try {
+                        Uri[] uris = {result};
+                        mUploadMessage.onReceiveValue(uris);
+                    } catch (Exception ew) {
+                    }
+
+                } else {
+                    if (mUploadMessage != null) {
+                        mUploadMessage.onReceiveValue(null);
+                    }
                 }
+                mUploadMessage = null;
             }
-            mUploadMessage = null;
+
         }
+
+
+        if (SuperWebView.SwebManager.Web.upFileType == 2) {
+
+            if (resultCode == RESULT_OK) {
+                if (null == mUploadMessage)
+                    return;
+                switch (requestCode) {
+                    case ACTIVITY_CAMREA:
+
+                        ArrayList<String> pathList = Album.parseResult(data);
+                        if (pathList.size() > 0) {
+                            Uri[] uris = {Uri.parse("file://" + pathList.get(0))};
+                            mUploadMessage.onReceiveValue(uris);
+                        } else {
+                            mUploadMessage.onReceiveValue(null);
+                            Toast.makeText(this, "获取图片失败", Toast.LENGTH_SHORT).show();
+                        }
+
+                        break;
+                    case ACTIVITY_ALBUM:
+                        ArrayList<String> pathList1 = Album.parseResult(data);
+                        if (pathList1.size() > 0) {
+                            Uri[] uris = {Uri.parse("file://" + pathList1.get(0))};
+                            mUploadMessage.onReceiveValue(uris);
+                        } else {
+                            mUploadMessage.onReceiveValue(null);
+                            Toast.makeText(this, "获取图片失败", Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+
+                    default:
+                        mUploadMessage.onReceiveValue(null);
+                }
+
+            }
+        }
+
     }
 
 
@@ -355,11 +475,10 @@ public class SuperWebView extends AppCompatActivity {
      */
     public static class SwebManager {
         public static void initLayout(View loadView) {
-            Log.e("", "ssssssssfsdfsdfdsf" + loadView);
             load_view = loadView;
-            progressBar = (ProgressBar) load_view.findViewById(R.id.progress);
-            sWebView = (WebView) load_view.findViewById(R.id.webview);
-            load_img = (ImageView) load_view.findViewById(R.id.load_img);
+            progressBar = (ProgressBar) load_view.findViewById(R.id.superweb_progress);
+            sWebView = (WebView) load_view.findViewById(R.id.superweb_webview);
+            load_img = (ImageView) load_view.findViewById(R.id.superweb_load_img);
         }
 
         public static class Progress {
@@ -386,29 +505,29 @@ public class SuperWebView extends AppCompatActivity {
             public static boolean supportJS; //支持JS
             public static boolean supportAccessFiles; //支持文件访问
             public static boolean builtInZoomControls; //设置缩放按钮
+            public static boolean supportCallSMS; //支持打电话 发短信
             public static int cacheMode; //缓存模式
-            public static boolean appCacheEnabled; //缓存模式
-            public static int downFileType; //下载文件方式  1，跳转浏览器下载  2，跳转本地系统下载 3，自定义下载器
-            public static String downFileName; //下载到地址位置
+            public static boolean appCacheEnabled; //缓存模式开关
+            public static int downFileType; //下载文件方式  1，跳转浏览器下载  2，跳转本地系统下载
+            public static String downFilePath; //下载到地址位置
             public static String upPicCompressSize; // 上传图片压缩尺寸 例：500*500
             public static int upPicCompressMultiple; // 上传图片压缩倍数 质量
-            public static String LoadLocalData; //加载本地数据
-            public static String LoadNetUrl; //加载地址
+            public static String LocalData; //加载本地数据
+            public static String NetUrl; //加载地址
             public static int upFileType; //文件上传方式  1，系统网页级别的默认相册和文件  2，自定义的相册获取器
             public static String WebTypeChoseText; //upFileType为1时  选择时候展示的文字
             public static String jsInterfaceName; //js交互标识符
-            public static String jsMethodName; //js方法名
 
 
-            public Web configCacheMode(int cacheMode, boolean appCacheEnabled) {
+            public Web configWebCache(int cacheMode, boolean appCacheEnabled) {
                 this.cacheMode = cacheMode;
                 this.appCacheEnabled = appCacheEnabled;
                 return this;
             }
 
-            public Web configDownFile(int downFileType, String downFileName) {
+            public Web configDownFile(int downFileType, String downFilePath) {
                 this.downFileType = downFileType;
-                this.downFileName = downFileName;
+                this.downFilePath = downFilePath;
                 return this;
             }
 
@@ -425,27 +544,28 @@ public class SuperWebView extends AppCompatActivity {
                 SuperWebView.jsCallback = jsCallback;
             }
 
-            //执行js方法
+            //执行js方法x
             public void executeJsMethod(String jsMethodName, String value) {
-                sWebView.loadUrl("javascript:" + jsMethodName + "(" + value + ")");
+                sWebView.loadUrl("javascript:" + jsMethodName + "('" + value + "')");
             }
 
-            public Web setLoadLocalData(String loadLocalData) {
-                LoadLocalData = loadLocalData;
+            public Web LoadLocalData(String loadLocalData) {
+                LocalData = loadLocalData;
                 return this;
             }
 
 
-            public Web setLoadNetUrl(String loadNetUrl) {
-                LoadNetUrl = loadNetUrl;
+            public Web LoadNetUrl(String loadNetUrl) {
+                NetUrl = loadNetUrl;
                 return this;
             }
 
-            public Web configBasics(boolean openGoBack, boolean supportJS, boolean supportAccessFiles, boolean builtInZoomControls) {
+            public Web configBasics(boolean openGoBack, boolean supportJS, boolean supportAccessFiles, boolean builtInZoomControls, boolean supportCallSMS) {
                 this.openGoBack = openGoBack;
                 this.supportJS = supportJS;
                 this.supportAccessFiles = supportAccessFiles;
                 this.builtInZoomControls = builtInZoomControls;
+                this.supportCallSMS = supportCallSMS;
                 return this;
             }
 
@@ -463,7 +583,8 @@ public class SuperWebView extends AppCompatActivity {
 
     public class JsCallbackMethodArea {
         @JavascriptInterface
-        public void example() {
+        public void jsTest() {
+            Toast.makeText(SuperWebView.this, "JS_test", Toast.LENGTH_SHORT).show();
         }
     }
 

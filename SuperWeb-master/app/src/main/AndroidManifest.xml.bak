@@ -2,7 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.cmbt.superweb">
 
+<<<<<<< HEAD
+=======
 
+    
+    
+>>>>>>> 822abf4c8f9a126c4835204bcad2894cdd518b6c
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />

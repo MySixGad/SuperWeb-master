@@ -56,10 +56,11 @@ onCreate方法里复制以下代码：
 
 布局文件复制以下代码：
 
-<net.cmbt.superweb.SuperWebLayout
-	android:id="@+id/superWebLayout"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent" />
+	<net.cmbt.superweb.SuperWebLayout
+		android:id="@+id/superWebLayout"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent" />
+	
 解决方案
 
 项目里用好几个webview拆分目标h5项目应该怎么和js交互，token登录的问题？

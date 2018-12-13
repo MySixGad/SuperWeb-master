@@ -1,9 +1,11 @@
 package net.cmbt.superweb;
+
 import android.os.Bundle;
 import android.os.Environment;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.widget.Toast;
+
 import net.cmbt.superweb.contact.SuperContact;
 import net.cmbt.superweb.view.SuperWebLayout;
 
@@ -25,8 +27,8 @@ public class MainActivity extends SuperWebView {
 
         //SuperWeb的基础配置、上传文件配置、下载文件配置、缓存配置
         final SwebManager.Web web = new SwebManager.Web();
-        web.LoadNetUrl("http://192.168.199.116/js.html")
-                .configBasics(true, true, true, true, false)
+        web.LoadNetUrl("https://github.com/MySixGad/SuperWeb-master")
+                .configBasics(true, true, true, true, true)
                 .configUpFile(SuperContact.UPFILETYPE_WEBDETIAL, "200*200", 2, "选择操作")
                 .configDownFile(SuperContact.DOWNFILETYPE_WEBDETIAL, filePath)
                 .configWebCache(WebSettings.LOAD_DEFAULT, false);

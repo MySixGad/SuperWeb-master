@@ -27,7 +27,7 @@ activity继承SuperWebView
 
 onCreate方法里复制以下代码：
 
-        SuperWebLayout superWebLayout = (SuperWebLayout) findViewById(R.id.superWebLayout);
+       SuperWebLayout superWebLayout = (SuperWebLayout) findViewById(R.id.superWebLayout);
         SwebManager.initLayout(superWebLayout);
         //SuperWeb的进度条基本配置
         SwebManager.Progress progress = new SwebManager.Progress();
@@ -36,7 +36,7 @@ onCreate方法里复制以下代码：
 
         //SuperWeb的基础配置、上传文件配置、下载文件配置、缓存配置
         final SwebManager.Web web = new SwebManager.Web();
-        web.LoadNetUrl("https://github.com/MySixGad/SuperWeb-master")
+        web.LoadNetUrl("http://192.168.199.116/js.html")
                 .configBasics(true, true, true, true, false)
                 .configUpFile(SuperContact.UPFILETYPE_WEBDETIAL, "200*200", 2, "选择操作")
                 .configDownFile(SuperContact.DOWNFILETYPE_WEBDETIAL, filePath)
@@ -56,11 +56,10 @@ onCreate方法里复制以下代码：
 
 布局文件复制以下代码：
 
-	<net.cmbt.superweb.SuperWebLayout
-		android:id="@+id/superWebLayout"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent" />
-	
+<net.cmbt.superweb.SuperWebLayout
+	android:id="@+id/superWebLayout"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent" />
 解决方案
 
 项目里用好几个webview拆分目标h5项目应该怎么和js交互，token登录的问题？

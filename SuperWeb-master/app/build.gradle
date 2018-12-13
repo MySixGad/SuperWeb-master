@@ -31,7 +31,12 @@ task makeJar(type: Copy) {
     rename('classes.jar', 'cmbt_superWeb-20181212.jar')
 }
 makeJar.dependsOn(build)
+allprojects {
+    repositories {
 
+        maven { url "https://jitpack.io" }
+    }
+}
 dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -41,6 +46,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     compile 'com.github.bumptech.glide:glide:4.0.0-RC1'
-    compile project(':Dialog_Lib')
-    compile project(':album')
+    compile 'com.github.wildma:PictureSelector:1.1.1'
 }

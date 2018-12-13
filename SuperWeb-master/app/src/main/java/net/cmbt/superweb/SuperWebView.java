@@ -3,10 +3,8 @@ package net.cmbt.superweb;
 import android.Manifest;
 import android.app.Activity;
 import android.app.DownloadManager;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -30,16 +28,17 @@ import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.yanzhenjie.album.Album;
+import com.wildma.pictureselector.PictureSelector;
+
 import net.cmbt.superweb.inteface.SwebLoadListener;
-import net.cmbt.superweb.utils.Utils;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 public abstract class SuperWebView extends AppCompatActivity {
@@ -152,7 +151,8 @@ public abstract class SuperWebView extends AppCompatActivity {
                             Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + replace.substring(0, replace.indexOf("?"))));
                             intent.putExtra("sms_body", replace.substring(replace.indexOf("?") + 1, replace.length()));
                             startActivity(intent);
-                        } catch (Exception e) {}
+                        } catch (Exception e) {
+                        }
                         return true;
                     }
 
@@ -204,7 +204,7 @@ public abstract class SuperWebView extends AppCompatActivity {
                         // 允许下载的网路类型
                         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI);
                         // 设置下载文件保存的路径和文件名
-                        String fileName  = URLUtil.guessFileName(url,SuperWebView.SwebManager.Web.downFilePath, url);
+                        String fileName = URLUtil.guessFileName(url, SuperWebView.SwebManager.Web.downFilePath, url);
                         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
                         // 外可选一下方法，自定义下载路径bj8
                         // request.setDestinationUri()
@@ -299,36 +299,11 @@ public abstract class SuperWebView extends AppCompatActivity {
         }*/
         mUploadMessage = filePath;
 
-        Utils.ActionSheetDialog(this, null, new String[]{"拍照", "相册"}, new Utils.onActionSheetDialogListener() {
-            @Override
-            public void onClick(int position, String mS, long id) {
-                if (position == 0) {
-
-                    Album.camera(SuperWebView.this)
-                            // .imagePath() // 指定相机拍照的路径，建议非特殊情况不要指定.
-                            .start(ACTIVITY_CAMREA); // 6666是请求码，返回时onActivityResult()的第一个参数。
-                } else {
-
-                    Album.album(SuperWebView.this)
-                            .toolBarColor(Color.parseColor("#ff0000")) // Toolbar 颜色，默认蓝色。
-                            .statusBarColor(Color.parseColor("#ff0000")) // StatusBar 颜色，默认蓝色。
-                            .navigationBarColor(Color.parseColor("#ff00ff")) // NavigationBar 颜色，默认黑色，建议使用默认。
-                            .title("图库") // 配置title。
-                            .columnCount(3) // 相册展示列数，默认是2列。
-                            .selectCount(1)
-                            .camera(false) // 是否有拍照功能。
-                            .start(ACTIVITY_ALBUM); // 9999是请求码，返回时onActivityResult()的第一个参数。
-                }
-            }
+        PictureSelector
+                .create(SuperWebView.this, PictureSelector.SELECT_REQUEST_CODE)
+                .selectPicture(true, 200, 200, 1, 1);
 
 
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                if (mUploadMessage != null) {
-                    mUploadMessage.onReceiveValue(null);
-                }
-            }
-        });
     }
 
 
@@ -427,43 +402,20 @@ public abstract class SuperWebView extends AppCompatActivity {
                 }
                 mUploadMessage = null;
             }
-
         }
 
-
         if (SuperWebView.SwebManager.Web.upFileType == 2) {
-
-            if (resultCode == RESULT_OK) {
-                if (null == mUploadMessage)
-                    return;
-                switch (requestCode) {
-                    case ACTIVITY_CAMREA:
-
-                        ArrayList<String> pathList = Album.parseResult(data);
-                        if (pathList.size() > 0) {
-                            Uri[] uris = {Uri.parse("file://" + pathList.get(0))};
-                            mUploadMessage.onReceiveValue(uris);
-                        } else {
-                            mUploadMessage.onReceiveValue(null);
-                            Toast.makeText(this, "获取图片失败", Toast.LENGTH_SHORT).show();
-                        }
-
-                        break;
-                    case ACTIVITY_ALBUM:
-                        ArrayList<String> pathList1 = Album.parseResult(data);
-                        if (pathList1.size() > 0) {
-                            Uri[] uris = {Uri.parse("file://" + pathList1.get(0))};
-                            mUploadMessage.onReceiveValue(uris);
-                        } else {
-                            mUploadMessage.onReceiveValue(null);
-                            Toast.makeText(this, "获取图片失败", Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-
-                    default:
+            if (requestCode == PictureSelector.SELECT_REQUEST_CODE) {
+                if (data != null) {
+                    String picturePath = data.getStringExtra(PictureSelector.PICTURE_PATH);
+                    Log.e("", "" + picturePath);
+                    Uri[] uris = {Uri.parse("file://" + picturePath)};
+                    mUploadMessage.onReceiveValue(uris);
+                } else {
+                    if (mUploadMessage != null) {
                         mUploadMessage.onReceiveValue(null);
+                    }
                 }
-
             }
         }
 

@@ -1,1 +1,1 @@
-include ':app', ':Dialog_Lib', ':album'
+include ':app'

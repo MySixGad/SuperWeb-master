@@ -6,7 +6,7 @@ package net.cmbt.superweb.contact;
 
 public  class SuperContact {
 
-    public static int UPFILETYPE_WEBDETIAL = 1; //文件上传方式  系统网页级别的默认相册和文件
+    public static int UPFILETYPE_WEBDETIAL = 1; //文件上传方式  系统网页级别的默认相册和文 件
     public static int UPFILETYPE_CUSTOM = 2; //文件上传方式 自定义的相册获取器
 
 

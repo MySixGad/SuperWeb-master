@@ -25,6 +25,8 @@
 
 #### 使用举例
 
+	activity继承SuperWebView
+
 	onCreate方法里复制以下代码：
 
        SuperWebLayout superWebLayout = (SuperWebLayout) findViewById(R.id.superWebLayout);

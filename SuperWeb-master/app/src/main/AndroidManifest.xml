@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.cmbt.superweb">
 
+<<<<<<< HEAD
+=======
+
+    
+    
+>>>>>>> 822abf4c8f9a126c4835204bcad2894cdd518b6c
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -92,12 +98,17 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <!-- 3.2.0版本增加 -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
+<<<<<<< HEAD
 
     <uses-permission android:name="android.permission.SEND_SMS"/>
     <uses-permission android:name="android.permission.READ_SMS"/>
     <uses-permission android:name="android.permission.WRITE_SMS"/>
 
 
+=======
+    
+    
+>>>>>>> 822abf4c8f9a126c4835204bcad2894cdd518b6c
 <!--        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
                 android:roundIcon="@mipmap/ic_launcher_round"

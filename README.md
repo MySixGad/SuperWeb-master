@@ -34,7 +34,7 @@
 	}
 	
 	dependencies {
-	        implementation 'com.github.MySixGad:SuperWeb-master:V1.0.5'
+	        compile 'com.github.MySixGad:SuperWeb-master:V1.0.5'
 	}
 
 

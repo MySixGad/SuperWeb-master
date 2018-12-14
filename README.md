@@ -25,6 +25,20 @@
 
 #### 使用举例
 
+	添加依赖：
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+	
+	dependencies {
+	        implementation 'com.github.MySixGad:SuperWeb-master:V1.0.5'
+	}
+
+
+
 	activity继承SuperWebView
 
 	onCreate方法里复制以下代码：

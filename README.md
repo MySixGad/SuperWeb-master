@@ -72,10 +72,12 @@
 
 	布局文件复制以下代码：
 
-	<net.cmbt.superweb.SuperWebLayout
-		android:id="@+id/superWebLayout"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent" />
+	  <net.cmbt.superweb.view.SuperWebLayout
+		    android:id="@+id/superWebLayout"
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"/>
+    
+
 
 
 #### 解决方案

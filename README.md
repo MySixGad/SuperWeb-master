@@ -11,7 +11,7 @@
 
 #### 解决问题
 <1> 普通的原生api封装，支持https，比较大的H5页面显示超出屏幕的问题，访问文件，支持js,设置显示缩放按钮，缓存问题
-<2> 拉不起前端<alert>，<input>, <a>等标签解决，返回按键的处理
+<2> 拉不起前端"< alert >"，"< input >", "< a >"等标签解决，返回按键的处理
 <3> 拍照、相册、录像、视频、下载文件等多种本地交互的及各机型适配
 <4> JS交互方法的封装，动画，service等一些特殊需求，自定义加载进度条，goBack返回复加载闪屏问题。
 <5> ...
@@ -24,6 +24,20 @@
 
 
 #### 使用举例
+
+	添加依赖：
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+	
+	dependencies {
+	        compile 'com.github.MySixGad:SuperWeb-master:V1.0.5'
+	}
+
+
 
 	activity继承SuperWebView
 
@@ -58,10 +72,12 @@
 
 	布局文件复制以下代码：
 
-	<net.cmbt.superweb.SuperWebLayout
-		android:id="@+id/superWebLayout"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent" />
+	  <net.cmbt.superweb.view.SuperWebLayout
+		    android:id="@+id/superWebLayout"
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"/>
+    
+
 
 
 #### 解决方案

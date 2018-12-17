@@ -41,7 +41,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public abstract class SuperWebView extends AppCompatActivity {
+public abstract class SuperWebView extends Activity {
     private static final int ACTIVITY_CAMREA = 6666;
     private static final int ACTIVITY_ALBUM = 9999;
     private static WebView sWebView;
@@ -499,6 +499,7 @@ public abstract class SuperWebView extends AppCompatActivity {
             //执行js方法x
             public void executeJsMethod(String jsMethodName, String value) {
                 sWebView.loadUrl("javascript:" + jsMethodName + "('" + value + "')");
+                sWebView.loadUrl("javascript:sendMsg()");
             }
 
             public Web LoadLocalData(String loadLocalData) {
@@ -524,7 +525,6 @@ public abstract class SuperWebView extends AppCompatActivity {
             public void setWebLoadListener(SwebLoadListener swebLoadListener) {
                 SuperWebView.swebLoadListener = swebLoadListener;
             }
-
         }
     }
 
